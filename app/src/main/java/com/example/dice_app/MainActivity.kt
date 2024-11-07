@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
         // Indításkor regisztráljuk a Wi-Fi MAC-címet sárga státusszal
-        checkLocationPermission()
+//        checkLocationPermission()
         registerCurrentWifiMac("yellow")
 
         // Wi-Fi kapcsolat változás figyelése
