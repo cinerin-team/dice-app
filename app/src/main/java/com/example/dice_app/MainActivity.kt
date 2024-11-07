@@ -63,9 +63,23 @@ class MainActivity : AppCompatActivity() {
     private fun registerDevice(macAddress: String, date: String, status: String) {
         val data = DeviceData(mac_address = macAddress, date = date, status = status)
         CoroutineScope(Dispatchers.IO).launch {
-            val response = RetrofitClient.instance.registerDevice(data).execute()
-            if (response.isSuccessful) {
-                // Sikeres regisztráció, esetleg további logika
+            try {
+                val response = RetrofitClient.instance.registerDevice(data).execute()
+                if (response.isSuccessful) {
+                    // Sikeres regisztráció
+                    runOnUiThread {
+                        statusText.text = "Fasza"
+                    }
+                } else {
+                    // Sikertelen kérés
+                    runOnUiThread {
+                        statusText.text = "Szerver hiba: ${response.code()}"
+                    }
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    statusText.text = "Hálózati hiba: ${e.message}"
+                }
             }
         }
     }
