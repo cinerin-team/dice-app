@@ -18,6 +18,13 @@ import java.util.*
 import android.util.Log
 import androidx.lifecycle.lifecycleScope
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+
+private val LOCATION_PERMISSION_REQUEST_CODE = 1
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -58,7 +65,7 @@ class MainActivity : AppCompatActivity() {
 
     // Idő és dátum formázása
     private fun getCurrentDate(): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd-hh-mm", Locale.getDefault())
         return dateFormat.format(Date())
     }
 
@@ -103,5 +110,36 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(wifiReceiver) // BroadcastReceiver leiratkozás, amikor az Activity megszűnik
+    }
+
+    private fun checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+
+            // Kérjük az engedélyt a felhasználótól
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE)
+        } else {
+            // Ha az engedély már megvan, regisztráljuk a Wi-Fi MAC-címet
+            registerCurrentWifiMac("yellow")
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Engedély megadva
+                registerCurrentWifiMac("yellow")
+            } else {
+                // Engedély megtagadva
+                statusText.text = "Helymeghatározási engedély szükséges a MAC-címhez"
+            }
+        }
     }
 }
