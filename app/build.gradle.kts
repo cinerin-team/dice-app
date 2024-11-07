@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.example.dice_app"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.dice_app"
-        minSdk = 34
-        targetSdk = 34
+        minSdk = 28
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
 
