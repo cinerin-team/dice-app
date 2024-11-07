@@ -31,18 +31,18 @@ class MainActivity : AppCompatActivity() {
         statusText = findViewById(R.id.status_text)
         wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-        // Regisztrálja az aktuális Wi-Fi MAC-címet indításkor
-        registerCurrentWifiMac()
+        // Indításkor regisztráljuk a Wi-Fi MAC-címet sárga státusszal
+        registerCurrentWifiMac("yellow")
 
         // Wi-Fi kapcsolat változás figyelése
         registerReceiver(wifiReceiver, IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION))
     }
 
-    // Lekéri és regisztrálja az aktuális Wi-Fi MAC-címet
-    private fun registerCurrentWifiMac() {
+    // Lekéri és regisztrálja az aktuális Wi-Fi MAC-címet a megadott státusszal
+    private fun registerCurrentWifiMac(status: String) {
         val macAddress = getCurrentWifiMacAddress()
         macAddress?.let {
-            registerDevice(it, getCurrentDate())
+            registerDevice(it, getCurrentDate(), status)
             currentMacAddress = it
         }
     }
@@ -60,8 +60,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Regisztrálja a MAC-címet a szerveren
-    private fun registerDevice(macAddress: String, date: String) {
-        val data = DeviceData(mac_address = macAddress, date = date)
+    private fun registerDevice(macAddress: String, date: String, status: String) {
+        val data = DeviceData(mac_address = macAddress, date = date, status = status)
         CoroutineScope(Dispatchers.IO).launch {
             val response = RetrofitClient.instance.registerDevice(data).execute()
             if (response.isSuccessful) {
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val newMacAddress = getCurrentWifiMacAddress()
             if (newMacAddress != null && newMacAddress != currentMacAddress) {
-                registerDevice(newMacAddress, getCurrentDate())
+                registerDevice(newMacAddress, getCurrentDate(), "yellow")
                 currentMacAddress = newMacAddress // Frissítjük az aktuális MAC-címet
             }
         }
