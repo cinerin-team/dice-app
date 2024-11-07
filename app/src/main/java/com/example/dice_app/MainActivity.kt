@@ -1,12 +1,10 @@
+package com.example.dice_app
+
 import android.graphics.Color
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.dice_app.DeviceData
-import com.example.dice_app.R
-import com.example.dice_app.RetrofitClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -15,9 +13,9 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var statusLight: View
+    private lateinit var statusLight: TextView
     private lateinit var statusText: TextView
-    private lateinit var checkButton: Button
+    private lateinit var actionButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,13 +23,26 @@ class MainActivity : AppCompatActivity() {
 
         statusLight = findViewById(R.id.status_light)
         statusText = findViewById(R.id.status_text)
-        checkButton = findViewById(R.id.check_button)
+        actionButton = findViewById(R.id.action_button)
 
-        checkButton.setOnClickListener {
-            val macAddress = getMacAddress()
-            val date = getCurrentDate()
-            registerDevice(macAddress, date)
+        val macAddress = getMacAddress()
+        val currentDate = getCurrentDate()
+
+        registerDevice(macAddress, currentDate)
+
+        actionButton.setOnClickListener {
+            checkStatus(macAddress, currentDate)
         }
+    }
+
+    private fun getMacAddress(): String {
+        // Implementáld a MAC cím lekérését
+        return "00:11:22:33:44:55" // Példa MAC cím
+    }
+
+    private fun getCurrentDate(): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return sdf.format(Date())
     }
 
     private fun registerDevice(macAddress: String, date: String) {
@@ -40,8 +51,9 @@ class MainActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             val response = RetrofitClient.instance.registerDevice(data).execute()
             if (response.isSuccessful) {
-                // Ellenőrzés sikeres, lekérjük az állapotot
-                checkStatus(macAddress, date)
+                // Sikeres regisztráció
+            } else {
+                // Hiba kezelése
             }
         }
     }
@@ -51,9 +63,8 @@ class MainActivity : AppCompatActivity() {
             val response = RetrofitClient.instance.checkStatus(macAddress, date).execute()
             if (response.isSuccessful) {
                 val message = response.body()?.get("message")
-                // UI frissítése a fő szálon
                 runOnUiThread {
-                    if (message?.value == "Status updated to red for matching devices") {
+                    if (message == "Status updated to red for matching devices") {
                         statusLight.setBackgroundColor(Color.RED)
                         statusText.text = "Piros: Probléma észlelve"
                     } else {
@@ -61,17 +72,9 @@ class MainActivity : AppCompatActivity() {
                         statusText.text = "Zöld: Nincs probléma"
                     }
                 }
+            } else {
+                // Hiba kezelése
             }
         }
-    }
-
-    private fun getMacAddress(): String {
-        // A megfelelő függvény a MAC-cím lekérésére
-        return "00:1A:2B:3C:4D:5E"  // Helyettesítsd a valós MAC-címmel
-    }
-
-    private fun getCurrentDate(): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return dateFormat.format(Date())
     }
 }

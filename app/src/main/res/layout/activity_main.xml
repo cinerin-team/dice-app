@@ -30,5 +30,11 @@
         android:layout_below="@id/status_text"
         android:layout_centerHorizontal="true"
         android:text="Ellenőrzés" />
+		
+	<Button
+		android:id="@+id/action_button"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Check Status" />
 
 </RelativeLayout>
