@@ -1,3 +1,4 @@
+import com.example.dice_app.DeviceData
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET

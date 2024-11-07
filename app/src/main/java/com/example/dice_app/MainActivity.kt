@@ -1,10 +1,12 @@
 import android.graphics.Color
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.example.dice_app.DeviceData
 import com.example.dice_app.R
+import com.example.dice_app.RetrofitClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,7 +53,7 @@ class MainActivity : AppCompatActivity() {
                 val message = response.body()?.get("message")
                 // UI frissítése a fő szálon
                 runOnUiThread {
-                    if (message == "Status updated to red for matching devices") {
+                    if (message?.value == "Status updated to red for matching devices") {
                         statusLight.setBackgroundColor(Color.RED)
                         statusText.text = "Piros: Probléma észlelve"
                     } else {

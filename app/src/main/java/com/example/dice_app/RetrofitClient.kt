@@ -1,8 +1,10 @@
+package com.example.dice_app
+
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "http://127.0.0.1:5000"
+    private const val BASE_URL = "http://pmqxyz.hopto.org:5000"
 
     val instance: ApiService by lazy {
         Retrofit.Builder()
