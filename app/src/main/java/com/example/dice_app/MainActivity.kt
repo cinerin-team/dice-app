@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
         // Indításkor regisztráljuk a Wi-Fi MAC-címet sárga státusszal
+        checkLocationPermission()
         registerCurrentWifiMac("yellow")
 
         // Wi-Fi kapcsolat változás figyelése
@@ -65,7 +66,7 @@ class MainActivity : AppCompatActivity() {
 
     // Idő és dátum formázása
     private fun getCurrentDate(): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd-hh-mm", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd-HH-mm", Locale.getDefault())
         return dateFormat.format(Date())
     }
 
