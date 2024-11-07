@@ -15,6 +15,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import android.util.Log
+import androidx.lifecycle.lifecycleScope
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -62,21 +65,23 @@ class MainActivity : AppCompatActivity() {
     // Regisztrálja a MAC-címet a szerveren
     private fun registerDevice(macAddress: String, date: String, status: String) {
         val data = DeviceData(mac_address = macAddress, date = date, status = status)
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch(Dispatchers.IO) {
+            Log.d("RegisterDevice", "Coroutine elindult")
             try {
                 val response = RetrofitClient.instance.registerDevice(data).execute()
                 if (response.isSuccessful) {
-                    // Sikeres regisztráció
+                    Log.d("RegisterDevice", "Sikeres küldés: ${response.body()}")
                     runOnUiThread {
-                        statusText.text = "Fasza"
+                        statusText.text = "Sikeres küldés"
                     }
                 } else {
-                    // Sikertelen kérés
+                    Log.d("RegisterDevice", "Szerver hiba: ${response.code()}")
                     runOnUiThread {
                         statusText.text = "Szerver hiba: ${response.code()}"
                     }
                 }
             } catch (e: Exception) {
+                Log.d("RegisterDevice", "Hálózati hiba: ${e.message}")
                 runOnUiThread {
                     statusText.text = "Hálózati hiba: ${e.message}"
                 }
