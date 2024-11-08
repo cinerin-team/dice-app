@@ -41,12 +41,8 @@ class MainActivity : AppCompatActivity() {
         statusText = findViewById(R.id.status_text)
         wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-        // Indításkor regisztráljuk a Wi-Fi MAC-címet sárga státusszal
-//        checkLocationPermission()
-        registerCurrentWifiMac("yellow")
-
-        // Wi-Fi kapcsolat változás figyelése
-        registerReceiver(wifiReceiver, IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION))
+        // Indításkor ellenőrizzük a MAC-cím színét
+        checkDeviceColor()
     }
 
     // Lekéri és regisztrálja az aktuális Wi-Fi MAC-címet a megadott státusszal
@@ -62,6 +58,54 @@ class MainActivity : AppCompatActivity() {
     private fun getCurrentWifiMacAddress(): String? {
         val info = wifiManager.connectionInfo
         return if (info != null && info.bssid != null) info.bssid else null
+    }
+
+    private fun checkDeviceColor() {
+        val macAddress = getCurrentWifiMacAddress()
+        macAddress?.let {
+            currentMacAddress = it
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    val response = RetrofitClient.instance.getDeviceColor(it).execute()
+                    if (response.isSuccessful && response.body() != null) {
+                        val color = response.body()!!["color"]
+                        runOnUiThread {
+                            updateColor(color ?: "green")
+                        }
+                    } else {
+                        // Ha nem található a MAC-cím, zöld színnel regisztráljuk
+                        registerDevice("green")
+                    }
+                } catch (e: Exception) {
+                    Log.e("MainActivity", "Hálózati hiba: ${e.message}")
+                }
+            }
+        }
+    }
+
+    private fun registerDevice(color: String) {
+        val macAddress = currentMacAddress ?: return
+        val data = DeviceData(mac_address = macAddress, date = getCurrentDate(), status = color)
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                RetrofitClient.instance.registerDevice(data).execute()
+                runOnUiThread {
+                    updateColor(color)
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Hálózati hiba a regisztrációnál: ${e.message}")
+            }
+        }
+    }
+
+    private fun updateColor(color: String) {
+        when (color) {
+            "green" -> statusLight.setBackgroundColor(Color.GREEN)
+            "yellow" -> statusLight.setBackgroundColor(Color.YELLOW)
+            "red" -> statusLight.setBackgroundColor(Color.RED)
+            else -> statusLight.setBackgroundColor(Color.GRAY)
+        }
+        statusText.text = "Státusz: $color"
     }
 
     // Idő és dátum formázása

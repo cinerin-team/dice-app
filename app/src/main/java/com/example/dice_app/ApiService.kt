@@ -15,4 +15,7 @@ interface ApiService {
         @Query("mac_address") macAddress: String,
         @Query("date") date: String
     ): Call<Map<String, String>>
+
+    @GET("/get_device")
+    fun getDeviceColor(@Query("mac_address") macAddress: String): Call<Map<String, String>>
 }
